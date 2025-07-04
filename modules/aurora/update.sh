@@ -15,5 +15,5 @@ git push
 
 echo $GIT_RELEASE
 
-# git tag -a $GIT_RELEASE -m "Release $GIT_RELEASE"                                                                                                                            ✔ 
+git tag -a $GIT_RELEASE -m "Release $GIT_RELEASE"                                                                                                                            ✔ 
 # git push origin $GIT_RELEASE
