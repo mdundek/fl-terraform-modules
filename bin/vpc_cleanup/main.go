@@ -12,10 +12,6 @@ import (
 )
 
 func main() {
-    fmt.Println("AWS_ACCESS_KEY_ID:", os.Getenv("AWS_ACCESS_KEY_ID"))
-    fmt.Println("AWS_SECRET_ACCESS_KEY:", os.Getenv("AWS_SECRET_ACCESS_KEY"))
-    fmt.Println("AWS_DEFAULT_REGION:", os.Getenv("AWS_DEFAULT_REGION"))
-
     if len(os.Args) < 2 {
         fmt.Printf("Usage: %s <vpc-id>", os.Args[0])
         os.Exit(1)
