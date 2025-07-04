@@ -80,7 +80,7 @@ resource "aws_security_group" "aurora_sg" {
 
 # 4. Aurora Cluster (with IAM DB Auth enabled)
 resource "aws_rds_cluster" "aurora" {
-    cluster_identifier        = var.db_name
+    cluster_identifier       = var.db_name
     engine                   = "aurora-mysql"
     engine_version           = var.engine_version
     database_name            = var.db_name

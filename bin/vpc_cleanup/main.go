@@ -11,11 +11,11 @@ import (
     "github.com/aws/aws-sdk-go-v2/service/ec2"
     "github.com/aws/aws-sdk-go-v2/service/ec2/types"
     "github.com/aws/aws-sdk-go-v2/credentials"
-    // "path/filepath"
+    "path/filepath"
 
     "k8s.io/client-go/kubernetes"
-    // "k8s.io/client-go/tools/clientcmd"
-    "k8s.io/client-go/rest"
+    "k8s.io/client-go/tools/clientcmd"
+    // "k8s.io/client-go/rest"
     metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -27,18 +27,18 @@ func main() {
     vpcID := os.Args[1]
 
     // Read credentials from the Kubernetes secret
-    accessKeyID, secretAccessKey, err := getAWSCredsFromK8sSecret("upbound-system", "aws-creds")
-    if err != nil {
-        fmt.Printf("Unable to load AWS credentials from secret: %v", err)
-        os.Exit(1)
-    }
+    // accessKeyID, secretAccessKey, err := getAWSCredsFromK8sSecret("upbound-system", "aws-creds")
+    // if err != nil {
+    //     fmt.Printf("Unable to load AWS credentials from secret: %v", err)
+    //     os.Exit(1)
+    // }
 
     ctx := context.TODO()
     cfg, err := config.LoadDefaultConfig(
         ctx,
         config.WithRegion("us-east-1"),
         config.WithCredentialsProvider(
-            credentials.NewStaticCredentialsProvider(accessKeyID, secretAccessKey, ""),
+            credentials.NewStaticCredentialsProvider("", "", ""),
         ),
     )
     if err != nil {
@@ -111,11 +111,11 @@ func parseAWSCreds(ini string) (accessKeyID, secretAccessKey string, err error) 
 }
 
 func getAWSCredsFromK8sSecret(namespace, secretName string) (string, string, error) {
-    config, err := rest.InClusterConfig()
-    // home := os.Getenv("HOME")
-    // kubeconfig := filepath.Join(home, ".kube", "config")
+    // config, err := rest.InClusterConfig()
+    home := os.Getenv("HOME")
+    kubeconfig := filepath.Join(home, ".kube", "config")
 
-    // config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+    config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
     if err != nil {
         return "", "", fmt.Errorf("failed to get in-cluster config: %w", err)
     }
