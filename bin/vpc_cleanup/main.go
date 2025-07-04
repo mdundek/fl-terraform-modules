@@ -11,8 +11,10 @@ import (
     "github.com/aws/aws-sdk-go-v2/service/ec2"
     "github.com/aws/aws-sdk-go-v2/service/ec2/types"
     "github.com/aws/aws-sdk-go-v2/credentials"
+    // "path/filepath"
 
     "k8s.io/client-go/kubernetes"
+    // "k8s.io/client-go/tools/clientcmd"
     "k8s.io/client-go/rest"
     metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -110,6 +112,10 @@ func parseAWSCreds(ini string) (accessKeyID, secretAccessKey string, err error) 
 
 func getAWSCredsFromK8sSecret(namespace, secretName string) (string, string, error) {
     config, err := rest.InClusterConfig()
+    // home := os.Getenv("HOME")
+    // kubeconfig := filepath.Join(home, ".kube", "config")
+
+    // config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
     if err != nil {
         return "", "", fmt.Errorf("failed to get in-cluster config: %w", err)
     }
