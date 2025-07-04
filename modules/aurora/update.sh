@@ -13,7 +13,7 @@ git add .
 git commit -m "refactor"
 git push
 
-cd bin/vpc_cleanup
+
 
 git tag -a $GIT_RELEASE -m "Release $GIT_RELEASE"                                                                                                                            ✔ 
 git push origin $GIT_RELEASE
