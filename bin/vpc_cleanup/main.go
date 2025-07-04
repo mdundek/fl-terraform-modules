@@ -9,6 +9,7 @@ import (
     "github.com/aws/aws-sdk-go-v2/config"
     "github.com/aws/aws-sdk-go-v2/service/ec2"
     "github.com/aws/aws-sdk-go-v2/service/ec2/types"
+    "github.com/aws/aws-sdk-go-v2/credentials"
 )
 
 func main() {
@@ -19,7 +20,17 @@ func main() {
     vpcID := os.Args[1]
 
     ctx := context.TODO()
-    cfg, err := config.LoadDefaultConfig(ctx)
+    cfg, err := config.LoadDefaultConfig(
+        ctx,
+        config.WithRegion("us-east-1"),
+        config.WithCredentialsProvider(
+            credentials.NewStaticCredentialsProvider(
+                "",
+                "",
+                "",
+            ),
+        ),
+    )
     if err != nil {
         fmt.Printf("Unable to load AWS SDK config, %v", err)
         os.Exit(1)
