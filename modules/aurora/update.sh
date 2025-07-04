@@ -19,3 +19,10 @@ git push
 
 git tag -a "$GIT_RELEASE" -m "Release bin"
 git push origin $GIT_RELEASE
+
+
+
+
+
+cd ../fl-crossplane
+sed -i '' -E 's/(module:.*ref=)[^&"]+/\1'$GIT_RELEASE'/' aurora.yaml
