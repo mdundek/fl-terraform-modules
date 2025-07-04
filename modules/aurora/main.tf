@@ -18,14 +18,17 @@ resource "aws_vpc" "main" {
 resource "null_resource" "clean-k8s-resources" {
     triggers = {
         vpc_id = aws_vpc.main.id
+        aws_access_key_id    = var.aws_access_key_id
+        aws_secret_access_key= var.aws_secret_access_key
+        aws_region           = var.region
     }
     provisioner "local-exec" {
         when    = "destroy"
         command = "${path.module}/bin/delete_sgs ${self.triggers.vpc_id}"
         environment = {
-            AWS_ACCESS_KEY_ID     = var.aws_access_key_id
-            AWS_SECRET_ACCESS_KEY = var.aws_secret_access_key
-            AWS_DEFAULT_REGION    = var.region
+            AWS_ACCESS_KEY_ID     = self.triggers.aws_access_key_id
+            AWS_SECRET_ACCESS_KEY = self.triggers.aws_secret_access_key
+            AWS_DEFAULT_REGION    = self.triggers.aws_region
         }
     }
 }
