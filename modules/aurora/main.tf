@@ -19,7 +19,7 @@ resource "null_resource" "clean-k8s-resources" {
     }
     provisioner "local-exec" {
         when    = "destroy"
-        command = "./bin/delete_sgs ${self.triggers.vpc_id}"
+        command = "./bin/vpc_cleanup/delete_sgs ${self.triggers.vpc_id}"
     }
 }
 
