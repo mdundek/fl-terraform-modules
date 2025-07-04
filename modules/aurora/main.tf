@@ -4,6 +4,8 @@ variable "master_password" { type = string }
 variable "instance_class" { type = string }
 variable "engine_version" { type = string }
 variable "region" { type = string }
+variable "aws_access_key_id" { type = string }
+variable "aws_secret_access_key" { type = string }
 
 # 1. VPC
 resource "aws_vpc" "main" {
@@ -20,6 +22,11 @@ resource "null_resource" "clean-k8s-resources" {
     provisioner "local-exec" {
         when    = "destroy"
         command = "${path.module}/bin/delete_sgs ${self.triggers.vpc_id}"
+        environment = {
+            AWS_ACCESS_KEY_ID     = var.aws_access_key_id
+            AWS_SECRET_ACCESS_KEY = var.aws_secret_access_key
+            AWS_DEFAULT_REGION    = var.region
+        }
     }
 }
 
