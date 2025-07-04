@@ -1,6 +1,7 @@
 #!/bin/bash
 
 GIT_RELEASE=$1
+GIT_RELEASE=$(echo "$GIT_RELEASE" | tr -d ' \n\r')
 
 cd ../../bin/vpc_cleanup
 go build -ldflags="-s -w" -o ../../modules/aurora/bin/delete_sgs main.go
