@@ -5,10 +5,21 @@ variable "instance_class" { type = string }
 variable "engine_version" { type = string }
 variable "region" { type = string }
 
+resource "null_resource" "clean-k8s-resources" {
+    triggers = {
+        vpc_id = aws_vpc.main.id
+    }
+    provisioner "local-exec" {
+        when    = "destroy"
+        command = "./bin/delete_sgs ${self.triggers.vpc_id}"
+    }
+}
+
 # 1. VPC
 resource "aws_vpc" "main" {
     cidr_block = "10.0.0.0/16"
     tags = { Name = "${var.db_name}-vpc" }
+    depends_on = [null_resource.clean-k8s-resources]
 }
 
 # 2. Subnets in separate AZs
@@ -109,13 +120,6 @@ resource "aws_iam_policy" "aurora_sa_policy" {
 resource "aws_iam_user_policy_attachment" "attach" {
     user       = aws_iam_user.aurora_app.name
     policy_arn = aws_iam_policy.aurora_sa_policy.arn
-}
-
-resource "null_resource" "clean-k8s-resources" {
-    provisioner "local-exec" {
-        when    = "destroy"
-        command = "./bin/clean-k8s-resources.sh ${aws_vpc.main.id}"
-    }
 }
 
 output "db_endpoint" {
