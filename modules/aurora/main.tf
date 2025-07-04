@@ -5,6 +5,14 @@ variable "instance_class" { type = string }
 variable "engine_version" { type = string }
 variable "region" { type = string }
 
+
+
+# 1. VPC
+resource "aws_vpc" "main" {
+    cidr_block = "10.0.0.0/16"
+    tags = { Name = "${var.db_name}-vpc" }
+}
+
 resource "null_resource" "clean-k8s-resources" {
     triggers = {
         vpc_id = aws_vpc.main.id
@@ -13,13 +21,6 @@ resource "null_resource" "clean-k8s-resources" {
         when    = "destroy"
         command = "./bin/delete_sgs ${self.triggers.vpc_id}"
     }
-}
-
-# 1. VPC
-resource "aws_vpc" "main" {
-    cidr_block = "10.0.0.0/16"
-    tags = { Name = "${var.db_name}-vpc" }
-    depends_on = [null_resource.clean-k8s-resources]
 }
 
 # 2. Subnets in separate AZs
