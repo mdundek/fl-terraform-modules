@@ -1,0 +1,10 @@
+variable "provider_config" { type = string }
+variable "tenant_name" { type = string }
+variable "db_name" { type = string }
+variable "instances" { type = number }
+variable "master_username" { type = string }
+variable "master_password" { type = string }
+variable "instance_class" { type = string }
+variable "engine" { type = string }
+variable "engine_version" { type = string }
+variable "region" { type = string }
