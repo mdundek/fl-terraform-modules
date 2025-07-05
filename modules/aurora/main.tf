@@ -5,6 +5,7 @@ variable "instances" { type = number }
 variable "master_username" { type = string }
 variable "master_password" { type = string }
 variable "instance_class" { type = string }
+variable "engine" { type = string }
 variable "engine_version" { type = string }
 variable "region" { type = string }
 
@@ -22,7 +23,7 @@ provider "aws" {
 # 1. Aurora Cluster (with IAM DB Auth enabled)
 resource "aws_rds_cluster" "aurora" {
     cluster_identifier       = var.db_name
-    engine                   = "aurora-mysql"
+    engine                   = var.engine
     engine_version           = var.engine_version
     database_name            = var.db_name
     master_username          = var.master_username
@@ -39,7 +40,7 @@ resource "aws_rds_cluster_instance" "aurora_instance" {
     identifier             = "${var.db_name}-instance-1"
     cluster_identifier     = aws_rds_cluster.aurora.id
     instance_class         = var.instance_class
-    engine                 = "aurora-mysql"
+    engine                 = var.engine
     engine_version         = var.engine_version
     tags = {
         Name   = "${var.db_name}-instance-${count.index + 1}"
