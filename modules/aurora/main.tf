@@ -6,77 +6,6 @@ variable "instance_class" { type = string }
 variable "engine_version" { type = string }
 variable "region" { type = string }
 
-# 1. VPC
-resource "aws_vpc" "main" {
-    cidr_block = "10.0.0.0/16"
-    tags = {
-        Name   = "${var.db_name}-vpc"
-    }
-}
-
-resource "null_resource" "clean-k8s-resources" {
-    triggers = {
-        vpc_id = aws_vpc.main.id
-    }
-    provisioner "local-exec" {
-        when    = "destroy"
-        command = "${path.module}/bin/delete_sgs ${self.triggers.vpc_id}"
-    }
-}
-
-# 2. Subnets in separate AZs
-data "aws_availability_zones" "available" {}
-resource "aws_subnet" "aurora_subnet1" {
-    vpc_id                  = aws_vpc.main.id
-    cidr_block              = "10.0.1.0/24"
-    availability_zone       = data.aws_availability_zones.available.names[0]
-    map_public_ip_on_launch = false
-    tags = {
-        Name   = "${var.db_name}-subnet1"
-    }
-}
-resource "aws_subnet" "aurora_subnet2" {
-    vpc_id                  = aws_vpc.main.id
-    cidr_block              = "10.0.2.0/24"
-    availability_zone       = data.aws_availability_zones.available.names[1]
-    map_public_ip_on_launch = false
-    tags = {
-        Name   = "${var.db_name}-subnet2"
-    }
-}
-# Aurora Subnet Group
-resource "aws_db_subnet_group" "aurora" {
-    name       = "${var.db_name}-subnet-group"
-    subnet_ids = [
-        aws_subnet.aurora_subnet1.id,
-        aws_subnet.aurora_subnet2.id,
-    ]
-    tags = {
-        Name   = "${var.db_name}-subnet-group"
-    }
-}
-
-# 3. Security Group permitting only VPC-local access
-resource "aws_security_group" "aurora_sg" {
-    name        = "${var.db_name}-aurora-sg"
-    description = "Aurora access"
-    vpc_id      = aws_vpc.main.id
-    ingress {
-        from_port   = 3306
-        to_port     = 3306
-        protocol    = "tcp"
-        cidr_blocks = ["10.0.0.0/16"]
-    }
-    egress {
-        from_port   = 0
-        to_port     = 0
-        protocol    = "-1"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
-    tags = {
-        Name   = "${var.db_name}-aurora-sg"
-    }
-}
 
 # 4. Aurora Cluster (with IAM DB Auth enabled)
 resource "aws_rds_cluster" "aurora" {
@@ -86,8 +15,6 @@ resource "aws_rds_cluster" "aurora" {
     database_name            = var.db_name
     master_username          = var.master_username
     master_password          = var.master_password
-    db_subnet_group_name     = aws_db_subnet_group.aurora.name
-    vpc_security_group_ids   = [aws_security_group.aurora_sg.id]
     iam_database_authentication_enabled = true
     skip_final_snapshot      = true
     tags = {

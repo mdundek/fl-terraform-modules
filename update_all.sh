@@ -7,10 +7,10 @@ fi
 
 GIT_RELEASE=$1
 
-cd bin/vpc_cleanup
+# cd bin/vpc_cleanup
 
 # GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o ../../modules/aurora/bin/delete_sgs main.go
-cd ../..
+# cd ../..
 
 git add .
 git commit -m "refactor"
