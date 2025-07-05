@@ -1,13 +1,25 @@
 variable "provider_config" { type = string }
+variable "tenant_name" { type = string }
 variable "db_name" { type = string }
+variable "instances" { type = number }
 variable "master_username" { type = string }
 variable "master_password" { type = string }
 variable "instance_class" { type = string }
 variable "engine_version" { type = string }
 variable "region" { type = string }
 
+provider "aws" {
+    shared_credentials_files = ["${path.module}/aws-creds.ini"]
+    region = "${var.region}"
+    default_tags {
+        tags = {
+            Tenant = "${var.tenant_name}"
+            Region = "${var.region}"
+        }
+    }
+}
 
-# 4. Aurora Cluster (with IAM DB Auth enabled)
+# 1. Aurora Cluster (with IAM DB Auth enabled)
 resource "aws_rds_cluster" "aurora" {
     cluster_identifier       = var.db_name
     engine                   = "aurora-mysql"
@@ -21,18 +33,20 @@ resource "aws_rds_cluster" "aurora" {
         Name   = "${var.db_name}-cluster"
     }
 }
+# 2. Aurora Cluster Instance
 resource "aws_rds_cluster_instance" "aurora_instance" {
+    count                  = var.instances
     identifier             = "${var.db_name}-instance-1"
     cluster_identifier     = aws_rds_cluster.aurora.id
     instance_class         = var.instance_class
     engine                 = "aurora-mysql"
     engine_version         = var.engine_version
     tags = {
-        Name   = "${var.db_name}-instance-1"
+        Name   = "${var.db_name}-instance-${count.index + 1}"
     }
 }
 
-# 5. IAM User for RDS IAM DB Authentication
+# 3. IAM User for RDS IAM DB Authentication
 resource "aws_iam_user" "aurora_app" {
     name = "${var.db_name}-appuser"
     tags = {
@@ -54,11 +68,13 @@ data "aws_iam_policy_document" "aurora_sa_policy" {
             "rds:DescribeDBClusterEndpoints",
             "rds:DescribeDBClusterParameters"
         ]
-        resources = [
-            aws_rds_cluster.aurora.arn,
-            "${aws_rds_cluster.aurora.arn}/*",
-            aws_rds_cluster_instance.aurora_instance.arn
-        ]
+        resources = concat(
+            [
+                aws_rds_cluster.aurora.arn,
+                "${aws_rds_cluster.aurora.arn}/*",
+            ],
+            aws_rds_cluster_instance.aurora_instance[*].arn
+        )
     }
 }
 resource "aws_iam_policy" "aurora_sa_policy" {
